@@ -3,16 +3,23 @@ package main
 import (
 	"fmt"
 	"reflect"
-	_ "unsafe"
 )
 
 //Reverse reverses a slice.
 var Reverse func(slice interface{}) = func(slice interface{}) {
-	// type assertion
-	sli := slice.(*[]myType)
+	fmt.Println(reflect.ValueOf(slice).Kind())
+	switch reflect.ValueOf(slice).Kind() {
+	case reflect.Ptr:
+		v := reflect.ValueOf(slice)
+		fmt.Println(v.Elem().Len())
+		n := v.Elem().Len()
 
-	for i := 0; i < len(*sli)/2; i++ {
-		(*sli)[i], (*sli)[len(*sli)-1-i] = (*sli)[len(*sli)-1-i], (*sli)[i]
+		for i := 0; i < n/2; i++ {
+			t := v.Elem().Index(i).Interface()
+			// need Set
+			v.Elem().Index(i).Set(reflect.ValueOf(v.Elem().Index(n - 1 - i).Interface()))
+			v.Elem().Index(n - 1 - i).Set(reflect.ValueOf(t))
+		}
 	}
 }
 
