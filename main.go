@@ -7,20 +7,26 @@ import (
 
 func MakeMap(fpt interface{}) {
 	fnV := reflect.ValueOf(fpt).Elem()
-	fmt.Println(fnV)
+	fmt.Println(fnV.Type().NumOut())
 	fnI := reflect.MakeFunc(fnV.Type(), implMap)
-	fmt.Println(fnI)
+	fmt.Println("haha1", fnI.Type().NumOut())
 	fnV.Set(fnI)
 }
 
 //TODO:completes implMap function.
-var implMap func(in []reflect.Value) []reflect.Value = func(in []reflect.Value) []reflect.Value {
-	fmt.Println(in[0].Type(), "haha", in[1])
+var implMap func(in []reflect.Value) []reflect.Value = func(in []reflect.Value) (res []reflect.Value) {
+	fmt.Println(in)
+	fmt.Println(in[0].Type(), in[1].Len())
+	//in[0] is func, in[1] is slice or map
 
-	for _, ele := range in[1] {
-		fmt.Println(ele)
+	for i := 0; i < in[1].Len(); i++ {
+		inslice := make([]reflect.Value, 1)
+		inslice[0] = in[1].Index(i)
+		res = append(res, in[0].Call(inslice)[0])
 	}
-	return nil
+
+	fmt.Println("len", len(res))
+	return
 }
 
 func main() {
