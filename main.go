@@ -15,11 +15,16 @@ var Reverse func(slice interface{}) = func(slice interface{}) {
 		n := v.Elem().Len()
 
 		for i := 0; i < n/2; i++ {
+			// transform t to interface, decouple the t and v[0]
 			t := v.Elem().Index(i).Interface()
 			// need Set
-			v.Elem().Index(i).Set(reflect.ValueOf(v.Elem().Index(n - 1 - i).Interface()))
+			v.Elem().Index(i).Set(v.Elem().Index(n - 1 - i))
+			fmt.Println("1", i, v.Elem())
+			fmt.Println(t, "3")
 			v.Elem().Index(n - 1 - i).Set(reflect.ValueOf(t))
+			fmt.Println("2", i, v.Elem())
 		}
+		fmt.Println(v.Elem())
 	}
 }
 
