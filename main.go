@@ -151,7 +151,7 @@ func (l *lexer) run() {
 	}
 }
 
-//------------------------------------sate function----------------------------------
+//------------------------------------state function----------------------------------
 func lexError(l *lexer) stateFn {
 	//premature lexical scanning
 	l.emit(tEOF)
@@ -215,9 +215,9 @@ func lexBegin(l *lexer) stateFn {
 func main() {
 	println(`In this task we will focus on a lexer implementation,and it's concurrency part.
 lexer is a lexical scanner that consumes source code and produce meaningful tokens.With these tokens we can then 
-complete a small calculator.Our simple lexer just need to scann several tokens '+','-','*','\',and numbers.
-Lexer is a typical produer-consumer pattern,so we need a channel to send token ater lexer initiated and run the scanner in a goroutine.
-Instead of switch,we use sate function,in order to skip the case statements.
+complete a small calculator.Our simple lexer just need to scan several tokens '+','-','*','\',and numbers.
+Lexer is a typical producer-consumer pattern,so we need a channel to send token ater lexer initiated and run the scanner in a goroutine.
+Instead of switch,we use state function,in order to skip the case statements.
 And finally we just need to receive tokens from the channel.
 Now edit main.go and finish the task.Utitiles of lexer have been given,you need to write a small regexp engine to complete the 'lexNum' stateFn and pass the test.(Notice don't run 'go test' right now,because lexNum is currently infinite loop.`)
 }
