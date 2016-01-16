@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	n  = 5 //scale of the tree.
+	n  = 5 //number of the tree node.
 	vp = 2 //number of chunks on one demension,totally vp(vp+1)/2
 )
 
@@ -17,7 +17,7 @@ var (
 	finish chan struct{}         //if reach the chunk(0,vp-1),send finish signal.
 )
 
-//prints from (il,jl) to (ih,jh)
+//print cost from (il,jl) to (ih,jh)
 func P(il, ih, jl, jh int) string {
 	var out string
 	for ii := il; ii <= ih; ii++ {
@@ -58,7 +58,9 @@ func MstSeq(i, j int) {
 }
 
 //compute chunk(i,j)
-var chunk func(i, j int)
+var chunk func(i, j int) = func(i, j int) {
+
+}
 
 func init() {
 	for i := 0; i < vp; i++ {
@@ -88,12 +90,12 @@ func main() {
 0 0 0 0 0 4 
 0 0 0 0 0 0 
 ` {
-		println(`Again,Go is designed for concurrency,it makes it easy to parrallel.This exercise is about parrallel dynamic programming.
+		println(`Again, Go is designed for concurrency, it makes it easy to parrallel. This exercise is about parrallel dynamic programming.
 We use the optimal binary search tree problem to show the multi-core parallel code in Go.
-The mean search time for tree(nodes form i+1 to j) is stored in cost[i][j],similarily root of the search tree is stored in root[i][j]
+The mean search time for tree(nodes from i+1 to j) is stored in cost[i][j], similarily root of the search tree is stored in root[i][j]
 And a tree mean search time is the total probability of all nodes plus the minium mean time of 2 possible sub trees.
 The sequential MST method has been given in the main.go
-In fact the every cost[i][j] depencies on their left and bottom neighbor.
+In fact every cost[i][j] depends on their left and bottom neighbor.
 So we can divide the computation into chunks like that (assume n is 5):
   
   * * *    | * * *
@@ -106,7 +108,7 @@ So we can divide the computation into chunks like that (assume n is 5):
                * *
                  *
 
-denotes left-top chunk(0,0),right-top chunk(0,1),right-bottom chunk(1,1).(0,1)dependencies (0,1) and (1,1),(0,1) and (1,1) can compute imeadiately.You should use channels to syncronize computation,please completes the func 'chunk' to pass the test"
+denotes left-top chunk(0,0),right-top chunk(0,1),right-bottom chunk(1,1). (0,1) depends (0,0) and (1,1), (0,0) and (1,1) can compute imediately.You should use channels to syncronize computation,please completes the func 'chunk' to pass the test"
 `)
 	}
 }
