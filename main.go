@@ -33,7 +33,7 @@ func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 				in := make([]reflect.Value, 1)
 				in[0] = reflect.ValueOf(ctx)
 				resp := r.handler.Call(in)[0]
-				fmt.Fprintf(res, "%s", resp)
+				res.Write([]byte(resp.String()))
 
 			}
 		}
