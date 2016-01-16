@@ -103,4 +103,10 @@ The first part is context management.Next part will focus on middleware.
 Now edit main.go file to Complete 'Server.ServeHttp()'.
 In this method you need to call the handler in the context and pass context as paramater if in the signature,
 and also write the return value to the responseWriter. `)
+	s := NewServer()
+	s.Get("/hello", func(ctx *Context) string {
+		name := ctx.URL.Query().Get("name")
+		return name
+	})
+	s.Run()
 }
