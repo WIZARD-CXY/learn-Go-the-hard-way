@@ -18,7 +18,7 @@ type Server struct {
 type route struct {
 	r       string        //route url
 	method  string        //method
-	handler reflect.Value //handle func
+	handler reflect.Value //handler func
 }
 
 //Middleware will be called before each request.
@@ -28,24 +28,32 @@ type Middleware interface {
 
 //TODO:Use add a new Middleware that implements Handle(*Context)
 func (s *Server) Use(middlewares ...Middleware) {
+	for _, item := range middlewares {
+		s.middlewares = append(s.middlewares, item)
+	}
+
 }
 
 //TODO:Next calls next middleware.
 func (ctx *Context) Next() {
+	ctx.idx++
 }
 
-//TODO:Invok calls middleware at index of ctx.idx.
+//TODO: Invok calls middleware at index of ctx.idx.
 func (ctx *Context) Invok() {
+	ctx.middlewares[ctx.idx].Handle(ctx)
+
 }
 
 //implements http.Handle
 func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	for _, r := range s.routes {
 		if r.r == req.URL.Path && r.method == req.Method {
-			//function handler
-			//*context must be the first argument.
+			// function handler
+			// *context must be the first argument.
 			ctx := &Context{req, res, s, make(map[string]string), s.middlewares, 0}
-			//call the middlewares
+			//call the middlewares, set the Form val
+			ctx.Invok()
 			ctx.Invok()
 
 			var args []reflect.Value
@@ -112,7 +120,7 @@ func (s *Server) Close() {
 func (s *Server) Run() {
 	mux := http.NewServeMux()
 	mux.Handle("/", s)
-	log.Printf("start serverving...\nPlease visit http://localhost:3000")
+	log.Printf("start servering...\nPlease visit http://localhost:3000")
 	l, err := net.Listen("tcp", s.addr)
 	if err != nil {
 		log.Fatal("ListenAndServe:", err)
@@ -154,8 +162,8 @@ type Context struct {
 	http.ResponseWriter
 	Server      *Server
 	Params      map[string]string
-	middlewares []Middleware //middleware
-	idx         int          //index of middleware
+	middlewares []Middleware // middleware
+	idx         int          // index of middleware
 }
 
 var contextType reflect.Type

@@ -10,7 +10,6 @@ import (
 )
 
 func TestTiny(t *testing.T) {
-
 	recorder := httptest.NewRecorder()
 	//send a request with post form name=foo
 	v := url.Values{}
@@ -21,7 +20,7 @@ func TestTiny(t *testing.T) {
 	s := NewServer()
 
 	//use middleware to parse the form before each request.
-	s.Use(new(ParseForm))
+	s.Use(new(ParseForm), new(ParseForm))
 
 	s.Post("/hello", func(ctx *Context) string {
 		name := ctx.Form.Get("name")
