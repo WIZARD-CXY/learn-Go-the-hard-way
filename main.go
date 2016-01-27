@@ -6,8 +6,8 @@ import (
 	"unicode/utf8"
 )
 
-//position is the token position in the source text,
-//used for error tracing,line and col counts from 0.
+// position is the token position in the source text,
+// used for error tracing,line and col counts from 0.
 type position struct {
 	line int //line number
 	col  int //colummn number
@@ -27,25 +27,25 @@ func (t token) String() string {
 	return fmt.Sprintf("<lit:\"%s\",typ:%s,pos line:%d,pos col:%d>", t.lit, tokens[t.typ], t.pos.line, t.pos.col)
 }
 
-//stateFn is used for state automaton convertion.
+//stateFn is used for state automation convertion.
 type stateFn func(l *lexer) stateFn
 
 //lexical parser.
 type lexer struct {
-	cur token //current scanned token
+	cur token // current scanned token
 
-	src string //source
+	src string // source
 
-	pos   int //current scanning index
-	start int //start scanning index
-	width int //width of string scanned
+	pos   int // current scanning index
+	start int // start scanning index
+	width int // width of string scanned
 
-	lineNum int //line counter,counts from 0
-	colNum  int //columnn counter,counts from 1
+	lineNum int // line counter,counts from 0
+	colNum  int // column counter,counts from 1
 
-	errors    []string   //errors stack
-	state     stateFn    //state function
-	tokenChan chan token //token channel
+	errors    []string   // errors stack
+	state     stateFn    // state function
+	tokenChan chan token // token channel
 }
 
 const (
@@ -53,7 +53,7 @@ const (
 	tNUM                  // number -?digit*.digit*[E|e]-?digit*
 
 	tPLUS  // +
-	tMUNIS // -
+	tMINUS // -
 
 	tMUTIL // *
 	tDIV   // /
@@ -65,7 +65,7 @@ const (
 const eof = -1
 
 var tokens = map[TokenType]string{
-	tMUNIS: "[-]",
+	tMINUS: "[-]",
 	tDIV:   "[/]",
 	tPLUS:  "[+]",
 	tMUTIL: "[*]",
@@ -87,10 +87,14 @@ func (l *lexer) next() rune {
 		l.width = 0
 		return eof
 	}
+
 	r, w := utf8.DecodeRuneInString(l.src[l.pos:])
+	//fmt.Println("haha", l.src[l.pos:], l.pos, w)
 	l.width = w
 	l.pos += l.width
 	l.colNum += l.width
+	//fmt.Println("haha", l.src[l.pos:], l.pos, w, l.width)
+	fmt.Println(string(r))
 	return r
 }
 
@@ -122,13 +126,14 @@ func (l *lexer) ignore() {
 	l.start = l.pos
 }
 
-//emit token
+//emit token to channel tokenChan
 func (l *lexer) emit(typ TokenType) {
 	var t = token{
 		lit: l.src[l.start:l.pos],
 		typ: typ,
 		pos: position{l.lineNum, l.colNum - (l.pos - l.start)},
 	}
+	fmt.Println("token is ", t)
 	l.tokenChan <- t
 	if t.typ == tEOF {
 		close(l.tokenChan)
@@ -138,7 +143,7 @@ func (l *lexer) emit(typ TokenType) {
 
 }
 
-//read token
+//read token one by one
 func (l *lexer) token() token {
 	token := <-l.tokenChan
 	return token
@@ -167,6 +172,7 @@ func lexUnkown(l *lexer) stateFn {
 //TODO:scan number,and emit the token.
 func lexNum(l *lexer) stateFn {
 	//unfinished
+	l.emit(tNUM)
 	return lexBegin
 }
 
@@ -180,7 +186,8 @@ func lexEOF(l *lexer) stateFn {
 func lexBegin(l *lexer) stateFn {
 	switch r := l.next(); {
 	case unicode.IsDigit(r) || r == '.' || r == '-':
-		l.backup()
+		//fmt.Printf("%#v\n", l)
+		//l.backup()
 		if r == '-' && l.cur.typ == tNUM {
 			goto L //go to minus
 		}
@@ -189,7 +196,7 @@ func lexBegin(l *lexer) stateFn {
 	L:
 		fallthrough
 	case r == '-':
-		l.emit(tMUNIS)
+		l.emit(tMINUS)
 	case r == '*':
 		l.emit(tMUTIL)
 	case r == '/':
@@ -214,9 +221,9 @@ func lexBegin(l *lexer) stateFn {
 
 func main() {
 	println(`In this task we will focus on a lexer implementation,and it's concurrency part.
-lexer is a lexical scanner that consumes source code and produce meaningful tokens.With these tokens we can then 
-complete a small calculator.Our simple lexer just need to scan several tokens '+','-','*','\',and numbers.
-Lexer is a typical producer-consumer pattern,so we need a channel to send token ater lexer initiated and run the scanner in a goroutine.
+lexer is a lexical scanner that consumes source code and produce meaningful tokens. With these tokens we can then 
+complete a small calculator.Our simple lexer just need to scan several tokens '+','-','*','/',and numbers.
+Lexer is a typical producer-consumer pattern,so we need a channel to send token after lexer initiated and run the scanner in a goroutine.
 Instead of switch,we use state function,in order to skip the case statements.
 And finally we just need to receive tokens from the channel.
 Now edit main.go and finish the task.Utitiles of lexer have been given,you need to write a small regexp engine to complete the 'lexNum' stateFn and pass the test.(Notice don't run 'go test' right now,because lexNum is currently infinite loop.`)
